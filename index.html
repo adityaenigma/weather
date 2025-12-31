@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delhi Weather Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+      .animate-float {
+        animation: float 4s ease-in-out infinite;
+      }
+      .fog-gradient {
+        background: linear-gradient(to bottom right, #4a5568, #cbd5e0);
+        transition: all 0.5s ease;
+      }
+
+      /* moon */
+      .moon-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 12px 16px;
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+      }
+
+      #moon-img {
+        width: 70px;
+        height: 70px;
+        opacity: 0;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        transform: scale(0.85);
+      }
+
+      #moon-img.show {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      #moon-text {
+        font-size: 16px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-200 min-h-screen flex-wrap items-center justify-center p-4 md:p-10 md:flex"
+  >
+    <!-- Main Content -->
+    <div
+      class="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl overflow-hidden min-h-[650px]"
+    >
+      <!-- left section -->
+      <div
+        class="md:w-5/12 p-12 flex flex-col justify-between text-white relative overflow-hidden"
+      >
+        <video
+          id="background-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          class="absolute top-0 left-0 w-full h-full object-cover z-0"
+        >
+          <source src="videos/Fog.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        <div class="absolute inset-0 bg-black/30 z-0"></div>
+
+        <div class="relative z-10">
+          <h2 class="text-2xl font-light opacity-80" id="date-display"></h2>
+          <h1 id="location-name" class="text-5xl font-bold mt-2"></h1>
+        </div>
+
+        <div class="flex justify-center items-center relative z-10">
+          <div class="animate-float" id="weather-icon-container"></div>
+        </div>
+
+        <div id="status" class="relative z-10 leading-tight">
+          <p class="text-8xl font-black" id="temp-display">11°</p>
+          <p class="text-2xl font-medium tracking-wide" id="weather-desc"></p>
+        </div>
+      </div>
+
+      <!-- right section -->
+      <div class="md:w-7/12 p-8 md:p-12 bg-white flex flex-col">
+        <div class="mb-10 relative">
+          <div
+            class="flex items-center bg-slate-100 rounded-2xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-slate-300 transition-all"
+          >
+            <div class="pl-4 text-slate-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="city-input"
+              placeholder="Search city..."
+              class="w-full bg-transparent border-none py-3 px-4 text-slate-700 focus:outline-none font-medium"
+            />
+            <button
+              id="search-btn"
+              class="bg-slate-800 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition-colors font-bold"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow">
+          <div class="flex items-center gap-4">
+            <div class="p-4 bg-slate-100 rounded-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6 text-slate-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-sm text-slate-400 font-bold uppercase tracking-tighter"
+              >
+                Visibility
+              </p>
+              <p class="text-xl font-bold text-slate-800" id="visibility">
+                500 m
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="p-4 bg-slate-100 rounded-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6 text-slate-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-sm text-slate-400 font-bold uppercase tracking-tighter"
+              >
+                Wind Speed
+              </p>
+              <p class="text-xl font-bold text-slate-800" id="wind-speed">
+                3.09 m/s
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="p-4 bg-slate-100 rounded-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6 text-slate-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-sm text-slate-400 font-bold uppercase tracking-tighter"
+              >
+                Pressure
+              </p>
+              <p class="text-xl font-bold text-slate-800" id="pressure">
+                1014 hPa
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="p-4 bg-slate-100 rounded-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6 text-slate-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-sm text-slate-400 font-bold uppercase tracking-tighter"
+              >
+                Cloudiness
+              </p>
+              <p class="text-xl font-bold text-slate-800" id="clouds">100 %</p>
+            </div>
+          </div>
+        </div>
+        <!-- Moon Phase -->
+
+        <div class="moon-card">
+          <img id="moon-img" alt="Moon Phase" />
+          <p id="moon-text"></p>
+        </div>
+
+        <!-- Sunrise and Sunset -->
+        <div class="mt-6 grid grid-cols-2 gap-4">
+          <div
+            class="p-4 bg-orange-50 rounded-3xl border border-orange-100 flex items-center gap-4"
+          >
+            <div class="p-3 bg-white rounded-2xl shadow-sm text-orange-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707.707m12.728 12.728L5.636 5.636"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-[10px] text-orange-400 font-bold uppercase tracking-wider"
+              >
+                Sunrise
+              </p>
+              <p class="text-lg font-bold text-slate-700" id="sunrise-time">
+                07:15 AM
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="p-4 bg-indigo-50 rounded-3xl border border-indigo-100 flex items-center gap-4"
+          >
+            <div class="p-3 bg-white rounded-2xl shadow-sm text-indigo-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider"
+              >
+                Sunset
+              </p>
+              <p class="text-lg font-bold text-slate-700" id="sunset-time">
+                05:45 PM
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Sunrise and Sunset -->
+        <div class="mt-6">
+          <div class="flex justify-between text-xs text-slate-400 mb-2">
+            <span id="sunrise-label">Sunrise</span>
+            <span id="sunset-label">Sunset</span>
+          </div>
+
+          <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              id="sun-progress"
+              class="h-full bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div
+          class="mt-8 p-6 bg-slate-50 rounded-3xl border border-slate-100 flex justify-between items-center"
+        >
+          <div>
+            <p class="text-xs text-slate-400 font-bold">FEELS LIKE</p>
+            <p class="text-2xl font-bold text-slate-700" id="feels-like">
+              10.64°C
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-slate-400 font-bold uppercase">Country</p>
+            <p class="text-lg font-bold text-slate-700" id="country-name">
+              India (IN)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sunrise and Sunset -->
+
+    <script type="module" src="app.js"></script>
+    <script type="module" src="default.js"></script>
+    <script type="module" src="moon.js"></script>
+  </body>
+</html>

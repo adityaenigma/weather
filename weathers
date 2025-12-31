@@ -1,0 +1,54 @@
+Clear
+Clouds
+Rain
+Drizzle
+Thunderstorm
+Snow
+Mist
+Smoke
+Haze
+Dust
+Fog
+Sand
+Ash
+Squall
+Tornado
+
+common -
+Clear
+Clouds
+Rain
+Snow
+Thunderstorm
+Fog
+
+open weather main -
+Clear -
+Clouds -
+Rain -
+Drizzle -
+Thunderstorm -
+Snow -
+Mist -
+Smoke -
+Haze -
+Dust
+Fog -
+Sand -
+Ash -
+Squall -
+Tornado
+
+  <div
+          class="mt-6 flex items-center gap-4 p-6 bg-slate-50 rounded-3xl border border-slate-100"
+        >
+          <div class="p-4 bg-indigo-100 rounded-2xl">
+            <!-- Moon Icon -->
+            <img src="images/moon-new.jpg" alt="" />
+          </div>
+
+          <div>
+            <p class="text-xs text-slate-400 font-bold uppercase">Moon Phase</p>
+            <p class="text-xl font-bold text-slate-700" id="moon-phase">--</p>
+          </div>
+        </div>
